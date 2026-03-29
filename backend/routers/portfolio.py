@@ -67,11 +67,47 @@ async def download_portfolio_pdf(request: PortfolioRequest):
     
     pdf_content = generate_portfolio_pdf(analysis_data, nav_results)
     
-    def iter_pdf():
-        yield pdf_content
-    
-    return StreamingResponse(
-        iter_pdf(),
+    from fastapi.responses import Response
+    return Response(
+        content=pdf_content,
         media_type="application/pdf",
-        headers={"Content-Disposition": "attachment; filename=portfolio_xray_report.pdf"}
+        headers={
+            "Content-Disposition": "attachment; filename=BharatAlpha_Portfolio_XRay.pdf",
+            "Content-Length": str(len(pdf_content)),
+            "Access-Control-Expose-Headers": "Content-Disposition",
+        }
+    )
+
+@router.get("/api/portfolio/download-pdf-get")
+async def download_portfolio_pdf_get(funds: str):
+    """GET endpoint for direct browser download. funds = comma-separated list."""
+    fund_list = [f.strip() for f in funds.split(",") if f.strip()]
+    if not (1 <= len(fund_list) <= 10):
+        raise HTTPException(status_code=400, detail="Must provide between 1 and 10 assets")
+        
+    tasks = [fetch_fund_nav(fund) for fund in fund_list]
+    nav_results, market_data = await asyncio.gather(
+        asyncio.gather(*tasks),
+        fetch_market_indices()
+    )
+    
+    benchmarks = {m["name"]: m["value"] for m in market_data} if market_data else {}
+    analysis = analyze_portfolio_with_openai(fund_list, nav_results, benchmarks)
+    
+    analysis_data = {
+        "funds_analyzed": nav_results,
+        "analysis": analysis,
+        "generated_at": datetime.now().isoformat()
+    }
+    
+    pdf_content = generate_portfolio_pdf(analysis_data, nav_results)
+    
+    from fastapi.responses import Response
+    return Response(
+        content=pdf_content,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": "attachment; filename=BharatAlpha_Portfolio_XRay.pdf",
+            "Content-Length": str(len(pdf_content)),
+        }
     )

@@ -3,9 +3,8 @@ import axios from 'axios';
 import {
   Activity, TrendingUp, TrendingDown, Briefcase, BarChart2,
   Star, GitBranch, MessageSquare, Radar, Zap, ArrowRight,
-  Users, Database, Brain, Shield, ChevronRight
+  Users, Database, Brain, Shield, ChevronRight, Search as SearchIcon
 } from 'lucide-react';
-import SearchBar from './SearchBar';
 
 /* ─── Animated counter ────────────────────────────────────────── */
 const AnimCounter = ({ target, suffix = '', prefix = '', duration = 1800 }) => {
@@ -286,9 +285,20 @@ const HomePage = ({ onNavigate }) => {
           ET AI Hackathon 2026 · Problem Statement #6 · AI for the Indian Investor
         </p>
 
-        {/* Universal Search — searches stocks, mutual funds, indices live */}
+        {/* Search button — redirects to the full Search page */}
         <div className="w-full flex justify-center mb-10" style={{ animation: 'slide-in 0.5s ease-out 0.28s both' }}>
-          <SearchBar onNavigate={onNavigate} variant="hero" />
+          <button
+            onClick={() => onNavigate('search')}
+            className="relative w-full max-w-2xl flex items-center gap-3 rounded-xl border border-border bg-bg-card hover:border-white/30 hover:shadow-glow px-5 py-4 transition-all duration-200 cursor-pointer group"
+          >
+            <SearchIcon size={18} className="text-text-muted shrink-0 group-hover:text-text-secondary transition-colors" />
+            <span className="flex-1 text-left text-base text-text-disabled group-hover:text-text-muted transition-colors">
+              Search stocks, mutual funds, indices… (e.g. RELIANCE, SBI Small Cap)
+            </span>
+            <span className="hidden sm:flex items-center gap-1 text-[10px] text-text-disabled border border-border rounded px-1.5 py-0.5 shrink-0">
+              Search
+            </span>
+          </button>
         </div>
 
         {/* Live indices row */}

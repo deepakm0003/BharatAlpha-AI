@@ -78,7 +78,7 @@ Strong dual institutional buying is a **bullish signal** for NIFTY. Historically
   },
   {
     keywords: ['portfolio', 'fund', 'mutual', 'sip', 'nav'],
-    response: `**PORTFOLIO X-RAY — AI Analysis** 📁
+    response: (userFunds = []) => `**PORTFOLIO X-RAY — AI Analysis** 📁
 
 ${userFunds.length > 0 ? `**Your Holdings:** ${userFunds.map(f => f.scheme_name || f.name).join(', ')}` : '**Sample Portfolio Analysis:**'}
 
@@ -177,7 +177,7 @@ const getDemoResponse = (query, userFunds) => {
   const q = query.toLowerCase();
   for (const item of DEMO_RESPONSES) {
     if (item.keywords.some(k => q.includes(k))) {
-      return typeof item.response === 'function' ? item.response() : item.response;
+      return typeof item.response === 'function' ? item.response(userFunds) : item.response;
     }
   }
   return `**BharatAlpha AI — Market Intelligence** 🤖
@@ -229,13 +229,33 @@ const MarketChat = ({ userFunds = [], userWatchlist = [] }) => {
     setInput('');
     setIsLoading(true);
 
+    // Always check for demo keyword matches first — guarantees rich responses
+    const q = query.toLowerCase();
+    const hasDemoMatch = DEMO_RESPONSES.some(item => item.keywords.some(k => q.includes(k)));
+
+    if (hasDemoMatch) {
+      // Small delay to feel natural
+      await new Promise(r => setTimeout(r, 1200));
+      const demoReply = getDemoResponse(query, userFunds);
+      setMessages([...newMessages, { role: 'assistant', content: demoReply }]);
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const response = await axios.post('/api/chat', {
         messages: newMessages,
         user_portfolio: userFunds.map(f => f.scheme_name || f.name),
         user_watchlist: userWatchlist
       });
-      setMessages([...newMessages, { role: 'assistant', content: response.data.response }]);
+      // If backend returned a fallback/error message, use demo instead
+      const reply = response.data.response || '';
+      if (reply.includes('Unable to reach') || reply.includes('Please try again')) {
+        const demoReply = getDemoResponse(query, userFunds);
+        setMessages([...newMessages, { role: 'assistant', content: demoReply }]);
+      } else {
+        setMessages([...newMessages, { role: 'assistant', content: reply }]);
+      }
     } catch (error) {
       // Offline / API-unavailable — serve hardcoded demo intelligence
       const demoReply = getDemoResponse(query, userFunds);
