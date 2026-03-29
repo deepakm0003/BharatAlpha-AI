@@ -11,7 +11,7 @@ client = OpenAI(api_key=api_key) if api_key else None
 def analyze_with_openai(system_prompt: str, user_query: str) -> str:
     """Sends a prompt to OpenAI GPT-4o-mini/4o for financial analysis."""
     if not client:
-        raise ValueError("OpenAI API key not found in environment")
+        return "[BharatAlpha] AI analysis is currently unavailable as the OpenAI API key is not configured. Please add OPENAI_API_KEY to your .env file."
     
     try:
         response = client.chat.completions.create(
@@ -26,12 +26,21 @@ def analyze_with_openai(system_prompt: str, user_query: str) -> str:
         return response.choices[0].message.content
     except Exception as e:
         print(f"[OpenAI] Error: {e}")
-        raise e
+        return f"[BharatAlpha] Error during AI analysis: {str(e)}"
 
 def analyze_portfolio_with_openai(funds: list, nav_data: list, market_context: dict = None) -> dict:
     """ChatGPT-powered Portfolio X-Ray analysis with benchmark awareness."""
     if not client:
-        raise ValueError("OpenAI API key not found")
+        return {
+            "overall_health": "FAIR",
+            "summary": "AI Analysis is currently unavailable because the OpenAI API key is missing. Please configure OPENAI_API_KEY in your backend .env file to enable professional institutional insights.",
+            "top_recommendation": "Configure OpenAI API Key for deep analysis.",
+            "estimated_xirr_range": "N/A",
+            "overlap_analysis": "Configuration required.",
+            "expense_drag": "N/A",
+            "funds_to_consider_replacing": [],
+            "suggested_alternatives": ["Add OpenAI API Key to see recommendations"]
+        }
 
     system_prompt = (
         "You are a elite institutional investment strategist at BharatAlpha. "
