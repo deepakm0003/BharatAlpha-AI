@@ -298,5 +298,4 @@ All analysis, signals, and recommendations on BharatAlpha AI are for **education
 
 **Team:** Solo submission · ET AI Hackathon 2026  
 **Powered by:** Claude Sonnet 4 + Google Gemini + NSE Live Data
-#   B h a r a t A l p h a - A I  
- 
+#
